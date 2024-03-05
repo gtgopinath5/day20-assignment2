@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dictionary Search</title>
+  <!-- Adding Bootstrap CSS -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #3c096c;
+    }
+
+    .navbar {
+      background-color: #2b2d42;
+    }
+
+    .search-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 50px;
+    }
+
+    .output-container {
+      width: 60%;
+      margin: 20px auto;
+      padding: 20px;
+      border-radius: 10px;
+      background-color: #cfbaf0; /* Random attractive color */
+    }
+
+    .word {
+      font-size: 24px;
+      font-weight: bold;
+      color: #14213d; /* Dark Blue */
+    }
+
+    .phonetic {
+      font-size: 18px;
+      color: #6a0572; /* Purple */
+    }
+
+    .part-of-speech {
+      font-size: 18px;
+      font-weight: bold;
+      color: #14213d; /* Dark Blue */
+    }
+
+    .definition {
+      font-size: 16px;
+      margin-bottom: 10px;
+      color: #14213d; /* Dark Blue */
+    }
+
+    label {
+      color:green;
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <a class="navbar-brand" href="#">Dictionary Search</a>
+  </nav>
+
+  <div class="container search-container">
+    <div class="card p-4">
+      <label for="searchBox">Search Word:</label>
+      <div class="input-group">
+        <input type="text" class="form-control" id="searchBox" placeholder="Type a word">
+        <div class="input-group-append">
+          <button class="btn btn-primary" onclick="searchDictionary()">Search</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="dictionaryOutput" class="output-container" placeholder="output display"></div>
+  </div>
+
+  <script>
+    function createElement(tag, content, attributes = {}) {
+      const element = document.createElement(tag);
+      element.textContent = content;
+
+      for (const [key, value] of Object.entries(attributes)) {
+        element.setAttribute(key, value);
+      }
+
+      return element;
+    }
+
+    async function searchDictionary() {
+      const searchBox = document.getElementById('searchBox');
+      const dictionaryOutput = document.getElementById('dictionaryOutput');
+
+      const word = searchBox.value.toLowerCase();
+      const apiUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`;
+
+      try {
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+
+        if (data.length > 0) {
+          const wordData = data[0];
+
+          dictionaryOutput.innerHTML = '';
+
+          const wordDiv = createElement('div', `Word: ${word}`, { class: 'word' });
+          const phoneticDiv = createElement('div', `Phonetic: ${wordData.phonetics[0].text}`, { class: 'phonetic' });
+
+          const meaningsDiv = createElement('div', '', { class: 'meanings' });
+
+          wordData.meanings.forEach(meaning => {
+            const partOfSpeechDiv = createElement('div', `Part of Speech: ${meaning.partOfSpeech}`, { class: 'part-of-speech' });
+            const definitionDiv = createElement('div', `Definition: ${meaning.definitions[0].definition}`, { class: 'definition' });
+
+            const meaningDiv = createElement('div', '', { class: 'meaning' });
+            meaningDiv.appendChild(partOfSpeechDiv);
+            meaningDiv.appendChild(definitionDiv);
+
+            meaningsDiv.appendChild(meaningDiv);
+          });
+
+          dictionaryOutput.appendChild(wordDiv);
+          dictionaryOutput.appendChild(phoneticDiv);
+          dictionaryOutput.appendChild(meaningsDiv);
+        } else {
+          dictionaryOutput.innerHTML = 'Word not found in the dictionary.';
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        dictionaryOutput.innerHTML = 'Error fetching data from the dictionary API.';
+      }
+    }
+  </script>
+
+  <!-- Adding Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+
+</html>
